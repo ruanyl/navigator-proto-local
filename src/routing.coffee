@@ -532,7 +532,9 @@ find_route_otp = (source, target, callback) ->
     $.getJSON citynavi.config.otp_base_url + "plan", params, (data) ->
         console.log "opentripplanner callback got data"
         data = otp_cleanup(data)
+        console.log "route data:", data
         display_route_result(data)
+        console.log "route data:", data
         if callback
             callback(routeLayer)
         $.mobile.changePage "#map-page"
@@ -657,9 +659,12 @@ render_route_layer = (itinerary, routeLayer) ->
                 # a bus drives.
                 # FIXME This should be drawn before the leg part is drawn because otherwise
                 # this is drawn on top of it and click events for the line  below are not triggered.
+                route = null
                 $.getJSON citynavi.config.otp_base_url + "transit/variantForTrip", {tripId: leg.tripId, tripAgency: leg.agencyId}, (data) ->
                     geometry = data.geometry
                     points = (new L.LatLng(point[0]*1e-5, point[1]*1e-5) for point in decode_polyline(geometry.points, 2))
+                    route = points
+                    console.log 'geometry:', points
                     line_layer = new L.Polyline(points, {color: color, opacity: 0.2})
                     line_layer.addTo(routeLayer)
 
@@ -669,6 +674,7 @@ render_route_layer = (itinerary, routeLayer) ->
                 # 23 for a bus at Tampere, Finland.
                 console.log "subscribing to #{leg.routeId}"
                 $.getJSON citynavi.config.siri_url, {lineRef: leg.routeId}, (data) ->
+                    console.log 'VehicleActivity', data.Siri.ServiceDelivery.VehicleMonitoringDelivery[0].VehicleActivity
                     for vehicle in data.Siri.ServiceDelivery.VehicleMonitoringDelivery[0].VehicleActivity
                         handle_vehicle_update true, siri_to_live(vehicle)
 

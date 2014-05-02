@@ -14,6 +14,5 @@ report.html
 sauce_connect.log
 selenium-screenshot-*.png
 src/local_config.coffee
-static/js/
 test_functional.tap
 testem.json
